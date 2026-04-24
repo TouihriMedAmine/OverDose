@@ -1,0 +1,11 @@
+{
+  "conditions": [
+    { "id": "asthma", "label": "Asthma" },
+    { "id": "cardiovascular", "label": "Cardiovascular" },
+    { "id": "diabetes", "label": "Diabetes" },
+    { "id": "pregnant", "label": "Pregnant" },
+    { "id": "newborn", "label": "Newborn" },
+    { "id": "pcos", "label": "PCOS" },
+    { "id": "obesity", "label": "Obesity" }
+  ]
+}

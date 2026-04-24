@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tunisia Product Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #388bfd33;
+      --success: #3fb950;
+      --border: #30363d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+    .search-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .category-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .category-row label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .category-row select {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      min-width: 200px;
+    }
+    .category-row select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .search-box input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+    }
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    .search-box button {
+      padding: 0.75rem 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent);
+      color: var(--bg);
+      cursor: pointer;
+    }
+    .search-box button:hover { filter: brightness(1.1); }
+    .search-box button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .summary {
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .summary strong { color: var(--text); }
+    .results {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .product-card {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .product-card:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+    }
+    .product-card .thumb {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background: var(--surface2);
+      object-fit: cover;
+    }
+    .product-card .thumb-placeholder {
+      flex-shrink: 0;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+    .product-card .body { flex: 1; min-width: 0; }
+    .product-card .title {
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      font-size: 0.98rem;
+    }
+    .product-card .meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .product-card .price { color: var(--success); font-weight: 600; }
+    .product-card .store {
+      padding: 0.15rem 0.5rem;
+      background: var(--accent-dim);
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .product-card .toxicity {
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .product-card .toxicity.low {
+      background: rgba(63, 185, 80, 0.2);
+      color: var(--success);
+    }
+    .product-card .toxicity.moderate {
+      background: rgba(210, 153, 34, 0.2);
+      color: #d29922;
+    }
+    .product-card .toxicity.high {
+      background: rgba(248, 81, 73, 0.2);
+      color: #f85149;
+    }
+    .product-card .url { color: var(--accent); word-break: break-all; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      margin-left: 0.5rem;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error {
+      padding: 1rem;
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      border-radius: 8px;
+      color: #f85149;
+    }
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+    .links-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+    .links-section h3 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--text-muted); }
+    .links-section a {
+      display: block;
+      padding: 0.5rem 0;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    .links-section a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🇹🇳 Tunisia Product Search</h1>
+      <p class="subtitle">Search availability and prices across Tunisian stores</p>
+    </header>
+    <div class="search-row">
+      <div class="category-row">
+        <label for="category">Category</label>
+        <select id="category" aria-label="Product category">
+          <option value="auto">Auto (from keywords)</option>
+          <option value="all">All stores</option>
+          <option value="food">Food & grocery</option>
+          <option value="cosmetics">Cosmetics & beauty</option>
+          <option value="pharmacy">Pharmacy & health</option>
+          <option value="electronics">Electronics & appliances</option>
+        </select>
+      </div>
+      <div class="search-box">
+        <input type="text" id="q" placeholder="e.g. iPhone, yogurt, crème, vitamine..." autofocus>
+        <button type="button" id="btn">Search</button>
+      </div>
+    </div>
+    <div id="out"></div>
+  </div>
+  <script>
+    const qEl = document.getElementById('q');
+    const catEl = document.getElementById('category');
+    const btn = document.getElementById('btn');
+    const out = document.getElementById('out');
+
+    function setLoading(loading) {
+      btn.disabled = loading;
+    }
+
+    function render(data) {
+      if (data.error) {
+        out.innerHTML = '<div class="error">' + escapeHtml(data.error) + '</div>';
+        return;
+      }
+      let html = '';
+      if (data.summary) {
+        html += '<div class="summary"><strong>'+ escapeHtml(data.query) + '</strong> — ' + escapeHtml(data.summary) + '</div>';
+        if (data.search_scope_note)
+          html += '<div class="summary" style="margin-top:-0.75rem">Scope: <strong>' + escapeHtml(data.search_scope_note) + '</strong></div>';
+        if (data.scope_widened)
+          html += '<div class="summary" style="margin-top:0.5rem;border-left:3px solid #d29922;padding-left:0.75rem">No hits in the selected category scope — showing results from <strong>all stores</strong> instead.</div>';
+      }
+      if (!data.products || data.products.length === 0) {
+        html += '<div class="empty">No products found. Try another search (e.g. iPhone, creme, yaourt).</div>';
+      } else {
+        html += '<div class="results">';
+        data.products.forEach(p => {
+          const title = p.title || 'Untitled';
+          const price = p.price || '—';
+          const store = p.store_name || '—';
+          const url = p.url || '#';
+          const img = p.image_url || '';
+          html += '<a href="' + escapeAttr(url) + '" target="_blank" rel="noopener" class="product-card">';
+          if (img) {
+            html += '<img class="thumb" src="' + escapeAttr(img) + '" alt="" loading="lazy">';
+          } else {
+            html += '<div class="thumb-placeholder">No image</div>';
+          }
+          html += '<div class="body">';
+          html += '<div class="title">' + escapeHtml(title) + '</div>';
+          const toxLabel = (p.toxicity_label || '').toLowerCase();
+          const toxScore = p.toxicity_score != null ? String(p.toxicity_score) : '—';
+          html += '<div class="meta">';
+          html += '<span class="price">' + escapeHtml(price) + '</span>';
+          html += '<span class="store">' + escapeHtml(store) + '</span>';
+          if (p.toxicity_label) {
+            html += '<span class="toxicity ' + escapeAttr(toxLabel) + '">Toxicity: ' + escapeHtml(p.toxicity_label) + ' (' + escapeHtml(toxScore) + '/100)</span>';
+          }
+          if (url && url !== '#') html += '<span class="url">' + escapeHtml(url) + '</span>';
+          html += '</div></div></a>';
+        });
+        html += '</div>';
+      }
+      if (data.search_links && data.search_links.length > 0) {
+        html += '<div class="links-section"><h3>More links (Tunisia)</h3>';
+        data.search_links.forEach(l => {
+          html += '<a href="' + escapeAttr(l.url || '#') + '" target="_blank" rel="noopener">' + escapeHtml(l.title || l.url || '') + '</a>';
+        });
+        html += '</div>';
+      }
+      out.innerHTML = html;
+    }
+
+    function escapeHtml(s) {
+      const div = document.createElement('div');
+      div.textContent = s;
+      return div.innerHTML;
+    }
+    function escapeAttr(s) {
+      return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function doSearch() {
+      const q = qEl.value.trim();
+      if (!q) return;
+      setLoading(true);
+      out.innerHTML = '<div class="loading">Searching Tunisian stores…</div>';
+      try {
+        const cat = (catEl && catEl.value) ? catEl.value : 'auto';
+        const r = await fetch('/api/search?q=' + encodeURIComponent(q) + '&fallback=true&category=' + encodeURIComponent(cat));
+        const data = await r.json();
+        if (!r.ok) render({ error: data.error || 'Request failed' });
+        else render(data);
+      } catch (e) {
+        render({ error: e.message || 'Network error' });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    btn.addEventListener('click', doSearch);
+    qEl.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+  </script>
+</body>
+</html>

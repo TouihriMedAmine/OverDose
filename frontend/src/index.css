@@ -1,0 +1,372 @@
+:root {
+  --bg: #0f1419;
+  --surface: #1a2332;
+  --surface2: #243044;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --accent: #58a6ff;
+  --accent-dim: #388bfd33;
+  --success: #3fb950;
+  --danger: #f85149;
+  --border: #30363d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "DM Sans", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+button {
+  cursor: pointer;
+}
+
+.layout {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.75rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+}
+
+.error {
+  padding: 0.75rem 1rem;
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid rgba(248, 81, 73, 0.35);
+  border-radius: 8px;
+  color: var(--danger);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.nav-links {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.summary {
+  padding: 0.75rem 1rem;
+  background: var(--surface2);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.summary strong {
+  color: var(--text);
+}
+
+.product-card {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.product-card:hover {
+  border-color: var(--accent);
+}
+
+.thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface2);
+  flex-shrink: 0;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.price {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.tox-low {
+  color: var(--success);
+}
+.tox-mod {
+  color: #d29922;
+}
+.tox-high {
+  color: var(--danger);
+}
+
+/* Light “mobile mock” results surface (Dashboard) */
+.results-surface-mock {
+  background: #f2f2f7;
+  border-radius: 16px;
+  padding: 1rem 1rem 1.25rem;
+  border: 1px solid var(--border);
+}
+
+.results-surface-mock h1 {
+  color: var(--text);
+  font-size: 1.25rem;
+}
+
+.search-pill-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 0.75rem;
+}
+
+.search-pill-wrap .search-pill-icon {
+  opacity: 0.45;
+  font-size: 1.1rem;
+  user-select: none;
+}
+
+.search-pill-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  min-width: 0;
+}
+
+.search-pill-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-filters-details {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.search-filters-details summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.product-card-mock {
+  display: flex;
+  gap: 0.85rem;
+  padding: 0.85rem;
+  background: #fff;
+  border-radius: 14px;
+  margin-bottom: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.product-card-mock:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.product-card-mock__thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: #eee;
+  flex-shrink: 0;
+}
+
+.product-card-mock__body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-card-mock__row1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.product-card-mock__title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.3;
+  color: #1a1a1a;
+}
+
+.product-card-mock__price {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  white-space: nowrap;
+}
+
+.product-card-mock__tox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.product-card-mock__tox-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.tox-mock-low {
+  color: #2e7d32;
+}
+.tox-mock-mod {
+  color: #e65100;
+}
+.tox-mock-high {
+  color: #c62828;
+}
+
+.product-card-mock__divider {
+  border: none;
+  border-top: 1px solid #e8e8ed;
+  margin: 0.25rem 0;
+}
+
+.product-card-mock__brand {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #333;
+}

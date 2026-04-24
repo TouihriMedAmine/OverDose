@@ -1,0 +1,111 @@
+{
+  "_comment": "Heuristic toxicity / hazard hints from product titles. Educational only; not medical or legal advice.",
+  "settings": {
+    "baseline_score": 14,
+    "max_score": 100,
+    "labels": {
+      "low": [0, 32],
+      "moderate": [33, 65],
+      "high": [66, 100]
+    }
+  },
+  "keyword_rules": [
+    {
+      "terms": ["paraben", "parabène", "parabens"],
+      "score": 26,
+      "note": "Preservative; some consumers seek to limit exposure."
+    },
+    {
+      "terms": ["sodium lauryl sulfate", "sodium laureth sulfate", "sls", "sles"],
+      "score": 22,
+      "note": "Surfactant; possible skin irritation for sensitive users."
+    },
+    {
+      "terms": ["triclosan"],
+      "score": 32,
+      "note": "Antimicrobial; regulatory scrutiny in several regions."
+    },
+    {
+      "terms": ["phthalate", "phtalate", "phthalates"],
+      "score": 28,
+      "note": "Plasticizer class; exposure topics in certain product types."
+    },
+    {
+      "terms": ["formaldehyde", "formol", "formaldehyde releasers"],
+      "score": 34,
+      "note": "Preservative / donor compounds in some cosmetics."
+    },
+    {
+      "terms": ["asbestos", "amiante"],
+      "score": 96,
+      "note": "Hazardous mineral; not acceptable in consumer goods."
+    },
+    {
+      "terms": ["mercury", "mercure", "thimerosal"],
+      "score": 40,
+      "note": "Heavy metal / organomercury contexts."
+    },
+    {
+      "terms": ["bpa", "bisphenol a", "bisphenol"],
+      "score": 24,
+      "note": "Monomer in some plastics; food-contact discussions."
+    },
+    {
+      "terms": ["glyphosate"],
+      "score": 18,
+      "note": "Herbicide residue topic for agricultural/food items."
+    },
+    {
+      "terms": ["pesticide", "pesticides", "insecticide"],
+      "score": 16,
+      "note": "General chemical-residue cue for produce/garden items."
+    },
+    {
+      "terms": ["oxybenzone", "octinoxate"],
+      "score": 20,
+      "note": "UV filters; sensitivity and environmental discussions."
+    },
+    {
+      "terms": ["talc", "talque"],
+      "score": 18,
+      "note": "Powder ingredient; purity and use-context considerations."
+    },
+    {
+      "terms": ["nano", "nanoparticule", "nanoparticles"],
+      "score": 14,
+      "note": "Particle-size labeling in cosmetics."
+    },
+    {
+      "terms": ["chlorure", "hypochlorite", "eau de javel", "javel"],
+      "score": 38,
+      "note": "Corrosive / strong oxidizer household products."
+    },
+    {
+      "terms": ["ammoniaque", "ammonia", "ammoniac"],
+      "score": 28,
+      "note": "Irritant vapor; typical in some cleaners."
+    },
+    {
+      "terms": ["acide", "acid", "hydrochloric", "sulfuric"],
+      "score": 26,
+      "note": "Strong acid cleaners require careful handling."
+    },
+    {
+      "terms": ["organic", "bio", "biologique", "naturel"],
+      "score": -6,
+      "note": "Marketing terms; does not guarantee low hazard."
+    }
+  ],
+  "product_risk_floors": [
+    {
+      "patterns": ["javel", "bleach", "eau de javel", "hypochlorite"],
+      "minimum_score": 58,
+      "note": "Bleach-class products: high handling risk."
+    },
+    {
+      "patterns": ["nettoyant four", "déboucheur", "drain cleaner"],
+      "minimum_score": 48,
+      "note": "Strong cleaners often corrosive."
+    }
+  ]
+}
