@@ -4,7 +4,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 import '../services/search_service.dart';
+import '../widgets/analysis_tab.dart';
+import '../widgets/chat_bot_tab.dart';
 import '../widgets/editable_profile_tab.dart';
+import '../widgets/scan_camera_tab.dart';
 import '../widgets/product_result_card.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _loyalty = true;
   bool _loading = false;
   String? _error;
+  String? _lastQuery;
   Map<String, dynamic>? _data;
   int _navIndex = 0;
 
@@ -51,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _error = null;
       _loading = true;
       _data = null;
+      _lastQuery = q;
     });
     try {
       final json = await _search.search(
@@ -144,8 +149,18 @@ class _HomeScreenState extends State<HomeScreen> {
           index: _navIndex,
           children: [
             _buildDiscoverTab(),
-            _buildPlaceholderTab('Scan', 'Product scanning coming soon.'),
-            _buildPlaceholderTab('Saved', 'Your saved items will appear here.'),
+            const ScanCameraTab(),
+            AnalysisTab(
+              data: _data,
+              lastQuery: _lastQuery,
+              onSearchNow: () => setState(() => _navIndex = 0),
+            ),
+            ChatBotTab(
+              userName: u.username,
+              analysisData: _data,
+              lastQuery: _lastQuery,
+              onOpenSearch: () => setState(() => _navIndex = 0),
+            ),
             EditableProfileTab(
               key: ValueKey<Object>('${u.id}-${u.email}-${u.diseases}'),
               user: u,
@@ -173,9 +188,14 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Scan',
           ),
           NavigationDestination(
-            icon: Icon(Icons.favorite_border_rounded),
-            selectedIcon: Icon(Icons.favorite_rounded),
-            label: 'Saved',
+            icon: Icon(Icons.analytics_outlined),
+            selectedIcon: Icon(Icons.analytics_rounded),
+            label: 'Analysis',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chat Bot',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
@@ -331,24 +351,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPlaceholderTab(String title, String subtitle) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.construction_rounded, size: 48, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
-          ],
-        ),
-      ),
     );
   }
 
