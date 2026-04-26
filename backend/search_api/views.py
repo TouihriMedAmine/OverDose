@@ -9,6 +9,11 @@ from brand_learning.brand_extract import extract_brand_guess
 from brand_learning.rl_update import apply_loyalty_ranking
 from brand_learning.service import affinity_map_for_user, top_brands_for_user
 
+# Import new endpoints
+from .chat import ChatView
+from .scan import ScanRecognitionView
+from .analysis import AnalysisHistoryView
+
 
 class ProductSearchView(APIView):
     """Runs the Tunisia product agent; optionally re-ranks by learned brand loyalty."""

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/analysis_service.dart';
 
-class AnalysisTab extends StatelessWidget {
+class AnalysisTab extends StatefulWidget {
   const AnalysisTab({
     super.key,
     required this.data,
@@ -13,13 +14,53 @@ class AnalysisTab extends StatelessWidget {
   final VoidCallback onSearchNow;
 
   @override
+  State<AnalysisTab> createState() => _AnalysisTabState();
+}
+
+class _AnalysisTabState extends State<AnalysisTab> {
+  final AnalysisService _analysisService = AnalysisService();
+  Map<String, dynamic>? _history;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final history = await _analysisService.getHistory(limit: 10);
+      if (mounted) {
+        setState(() {
+          _history = history;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final products = (data?['products'] as List<dynamic>?) ?? const [];
-    final summary = data?['summary']?.toString();
-    final scopeNote = data?['search_scope_note']?.toString();
-    final searchLinks = (data?['search_links'] as List<dynamic>?) ?? const [];
-    final favoriteBrands = (data?['brand_loyalty'] is Map)
-        ? ((data!['brand_loyalty'] as Map)['favorite_brands'] as List<dynamic>?) ?? const []
+    final products = (widget.data?['products'] as List<dynamic>?) ?? const [];
+    final summary = widget.data?['summary']?.toString();
+    final scopeNote = widget.data?['search_scope_note']?.toString();
+    final searchLinks = (widget.data?['search_links'] as List<dynamic>?) ?? const [];
+    final favoriteBrands = (widget.data?['brand_loyalty'] is Map)
+        ? ((widget.data!['brand_loyalty'] as Map)['favorite_brands'] as List<dynamic>?) ?? const []
         : const [];
 
     final lowCount = _countToxicity(products, 'low');
@@ -36,7 +77,7 @@ class AnalysisTab extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          lastQuery == null ? 'Run a search to generate insights.' : 'Insights for "$lastQuery"',
+          widget.lastQuery == null ? 'Run a search to generate insights.' : 'Insights for "${widget.lastQuery}"',
           style: TextStyle(color: Colors.grey.shade700),
         ),
         const SizedBox(height: 16),
@@ -152,8 +193,77 @@ class AnalysisTab extends StatelessWidget {
           ),
           const SizedBox(height: 12),
         ],
+        Card(
+          elevation: 0,
+          color: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Search History', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    if (!_isLoading)
+                      TextButton.icon(
+                        onPressed: _loadHistory,
+                        icon: const Icon(Icons.refresh_rounded, size: 18),
+                        label: const Text('Refresh'),
+                        style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (_isLoading)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                else if (_error != null)
+                  Text('Error loading history: $_error', style: TextStyle(color: Colors.red.shade600))
+                else if (_history == null || (_history!['history'] as List?)?.isEmpty == true)
+                  Text('No search history yet.', style: TextStyle(color: Colors.grey.shade600))
+                else
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: (_history!['history'] as List<dynamic>? ?? [])
+                        .map((raw) {
+                          final item = raw as Map<String, dynamic>;
+                          final query = item['query']?.toString() ?? 'Unknown';
+                          final resultCount = item['result_count'] ?? 0;
+                          final timestamp = item['timestamp']?.toString() ?? '';
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  query,
+                                  style: TextStyle(fontWeight: FontWeight.w500, color: Colors.grey.shade900),
+                                ),
+                                Text(
+                                  '$resultCount results • ${timestamp.isNotEmpty ? timestamp : 'Recently'}',
+                                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          );
+                        })
+                        .toList(),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: onSearchNow,
+          onPressed: widget.onSearchNow,
           icon: const Icon(Icons.search_rounded),
           label: const Text('Start a new search'),
         ),

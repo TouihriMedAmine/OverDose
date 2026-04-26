@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../services/scan_service.dart';
 
 class ScanCameraTab extends StatefulWidget {
   const ScanCameraTab({super.key});
@@ -15,6 +16,9 @@ class _ScanCameraTabState extends State<ScanCameraTab> with WidgetsBindingObserv
   List<CameraDescription> _cameras = const [];
   String? _error;
   bool _isRearCamera = true;
+  final ScanService _scanService = ScanService();
+  bool _isProcessing = false;
+  Map<String, dynamic>? _scanResult;
 
   @override
   void initState() {
@@ -79,6 +83,72 @@ class _ScanCameraTabState extends State<ScanCameraTab> with WidgetsBindingObserv
     await _controller?.dispose();
     _controller = null;
     await _initCamera();
+  }
+
+  Future<void> _captureAndRecognize() async {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized || _isProcessing) return;
+
+    setState(() => _isProcessing = true);
+
+    try {
+      // Capture image from camera
+      final image = await controller.takePicture();
+      final imageBytes = await image.readAsBytes();
+
+      // Call recognition API
+      final result = await _scanService.recognizeBarcode(imageBytes);
+
+      if (mounted) {
+        setState(() {
+          _scanResult = result;
+          _isProcessing = false;
+        });
+
+        // Show result dialog
+        if (context.mounted) {
+          _showScanResultDialog(result);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Recognition failed: $e')),
+        );
+      }
+    }
+  }
+
+  void _showScanResultDialog(Map<String, dynamic> result) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Scan Result'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Detected: ${result['barcode_type'] ?? 'N/A'}'),
+            const SizedBox(height: 8),
+            Text('Value: ${result['barcode_value'] ?? 'N/A'}'),
+            const SizedBox(height: 8),
+            Text('Confidence: ${(result['confidence'] as num?)?.toStringAsFixed(2) ?? 'N/A'}%'),
+            if (result['product_info'] != null) ...[
+              const SizedBox(height: 12),
+              const Text('Product Info:', style: TextStyle(fontWeight: FontWeight.w600)),
+              Text('Name: ${result['product_info']['name'] ?? 'Unknown'}'),
+            ],
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -197,16 +267,29 @@ class _ScanCameraTabState extends State<ScanCameraTab> with WidgetsBindingObserv
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.42),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Text(
-                  'Live camera ready',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (_isProcessing)
+                      const SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 3,
+                        ),
+                      )
+                    else
+                      FloatingActionButton(
+                        onPressed: _captureAndRecognize,
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        tooltip: 'Capture and recognize',
+                        child: const Icon(Icons.camera_alt_rounded, size: 28),
+                      ),
+                  ],
                 ),
               ),
             ),

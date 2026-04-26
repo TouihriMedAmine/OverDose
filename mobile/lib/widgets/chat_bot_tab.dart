@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/chat_service.dart';
 
 class ChatBotTab extends StatefulWidget {
   const ChatBotTab({
@@ -22,6 +23,8 @@ class _ChatBotTabState extends State<ChatBotTab> {
   final TextEditingController _ctrl = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<_ChatMessage> _messages = [];
+  final ChatService _chatService = ChatService();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -41,15 +44,47 @@ class _ChatBotTabState extends State<ChatBotTab> {
     super.dispose();
   }
 
-  void _send([String? preset]) {
+  void _send([String? preset]) async {
     final text = (preset ?? _ctrl.text).trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isLoading) return;
 
     setState(() {
       _messages.add(_ChatMessage(text: text, fromUser: true));
-      _messages.add(_ChatMessage(text: _replyFor(text), fromUser: false));
+      _isLoading = true;
       _ctrl.clear();
     });
+
+    try {
+      // Get products list for context
+      final products = (widget.analysisData?['products'] as List<dynamic>?) ?? [];
+      final productsAsMap = products.map((p) => p as Map<String, dynamic>).toList();
+
+      // Call API
+      final response = await _chatService.sendMessage(
+        message: text,
+        lastQuery: widget.lastQuery ?? '',
+        products: productsAsMap,
+      );
+
+      final botResponse = response['bot_response'] ?? 'I encountered an error. Please try again.';
+
+      if (mounted) {
+        setState(() {
+          _messages.add(_ChatMessage(text: botResponse, fromUser: false));
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _messages.add(_ChatMessage(
+            text: 'Error: ${e.toString()}. Please try again.',
+            fromUser: false,
+          ));
+          _isLoading = false;
+        });
+      }
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
@@ -59,55 +94,6 @@ class _ChatBotTabState extends State<ChatBotTab> {
         curve: Curves.easeOut,
       );
     });
-  }
-
-  String _replyFor(String input) {
-    final text = input.toLowerCase();
-    final summary = widget.analysisData?['summary']?.toString();
-    final scopeNote = widget.analysisData?['search_scope_note']?.toString();
-    final products = (widget.analysisData?['products'] as List<dynamic>?) ?? const [];
-    final lowCount = _countToxicity(products, 'low');
-    final moderateCount = _countToxicity(products, 'moderate');
-    final highCount = _countToxicity(products, 'high');
-
-    if (text.contains('help') || text.contains('what can you do')) {
-      return 'I can explain the latest search, summarize analysis, help you reach Home for a new search, or point you to Profile and Scan.';
-    }
-    if (text.contains('last search') || text.contains('analysis') || text.contains('summary')) {
-      if (summary == null) {
-        return 'No search summary is available yet. Open Home, run a product search, and I will summarize the results here.';
-      }
-      final extra = scopeNote == null ? '' : ' Scope: $scopeNote.';
-      return '$summary$extra';
-    }
-    if (text.contains('safe') || text.contains('low risk') || text.contains('low toxicity')) {
-      if (products.isEmpty) {
-        return 'I do not have any product results yet. Search first and I can help sort them by risk level.';
-      }
-      return 'From the latest results I see $lowCount low-risk, $moderateCount moderate-risk, and $highCount high-risk products. The best starting point is usually the low-risk group.';
-    }
-    if (text.contains('scan')) {
-      return 'The Scan tab is ready for the future product scanner. For now, use Home to search by name or brand.';
-    }
-    if (text.contains('profile') || text.contains('condition') || text.contains('disease')) {
-      return 'Your Profile tab lets you update email, date of birth, gender, and health conditions so search results can be personalized.';
-    }
-    if (text.contains('search')) {
-      return 'Go to Home, type a product name or brand, and tap search. You can also open filters to narrow the category.';
-    }
-    if (text.contains('hello') || text.contains('hi')) {
-      return 'Hello. Ask me about your latest search, safe products, profile, or where to find the analysis tab.';
-    }
-
-    return 'I can answer based on the app context. Try asking about the latest search, safer products, your profile, or how to start a new search.';
-  }
-
-  int _countToxicity(List<dynamic> products, String target) {
-    return products.where((raw) {
-      final item = raw as Map<String, dynamic>;
-      final label = item['toxicity_label']?.toString().trim().toLowerCase() ?? '';
-      return label == target;
-    }).length;
   }
 
   @override
@@ -205,8 +191,9 @@ class _ChatBotTabState extends State<ChatBotTab> {
               Expanded(
                 child: TextField(
                   controller: _ctrl,
+                  enabled: !_isLoading,
                   textInputAction: TextInputAction.send,
-                  onSubmitted: (_) => _send(),
+                  onSubmitted: _isLoading ? null : (_) => _send(),
                   decoration: InputDecoration(
                     hintText: 'Ask the bot...',
                     filled: true,
@@ -217,9 +204,15 @@ class _ChatBotTabState extends State<ChatBotTab> {
               ),
               const SizedBox(width: 10),
               FilledButton(
-                onPressed: _send,
+                onPressed: _isLoading ? null : _send,
                 style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18)),
-                child: const Icon(Icons.send_rounded),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.send_rounded),
               ),
             ],
           ),

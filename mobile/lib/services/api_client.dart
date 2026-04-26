@@ -79,6 +79,10 @@ class ApiClient {
     return res;
   }
 
+  Future<String?> getToken() async {
+    return _storage.getAccess();
+  }
+
   Future<String?> _refreshAccess() async {
     final r = await _storage.getRefresh();
     if (r == null || r.isEmpty) return null;
