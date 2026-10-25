@@ -13,9 +13,10 @@ An agent that takes **any product** (electronics, food, cosmetics, pharmacy, etc
 ## Setup
 
 ```bash
-cd D:\9raya\Sem2\Deep\try
 pip install -r requirements.txt
 ```
+
+Run the commands below from the repository root. The toxicity number is a keyword-rule score from `data/toxicity.json`, not a trained model.
 
 ## Usage
 
